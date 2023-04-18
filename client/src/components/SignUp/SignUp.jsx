@@ -14,14 +14,6 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 
-function Copyright(props) {
-  return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © Dias Mukash. 2023 EUL Graduation Project ❤️'}
-    </Typography>
-  );
-}
-
 const theme = createTheme();
 
 export default function SignUp() {
@@ -152,7 +144,6 @@ export default function SignUp() {
         </Grid>
       </Box>
     </Box>
-    <Copyright sx={{ mt: 5 }} />
   </Container>
 </ThemeProvider>);
 }
