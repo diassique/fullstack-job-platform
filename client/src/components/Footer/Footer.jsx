@@ -8,8 +8,6 @@ const Footer = (props) => {
       sx={{
         backgroundColor: 'rgb(211, 211, 211)',
         width: '100%',
-        position: 'absolute',
-        bottom: 0,
         paddingTop: 2,
         paddingBottom: 2,
       }}
@@ -25,5 +23,6 @@ const Footer = (props) => {
     </Box>
   );
 };
+
 
 export default Footer;

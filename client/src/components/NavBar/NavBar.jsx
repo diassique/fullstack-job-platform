@@ -23,16 +23,20 @@ export default function NavBar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ backgroundColor: '#ffffff', color: 'black' }}>
         <Toolbar>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1, textAlign: 'left' }}>
-            Recruitment System
-          </Typography>
+          <Box sx={{ flexGrow: 1, display: 'flex' }}>
+            <RouterLink to="/" style={{ textDecoration: 'none', color: 'inherit' }}>
+              <Typography variant="h6" component="div" sx={{ textAlign: 'left', ml: 'auto' }}>
+                Recruitment System
+              </Typography>
+            </RouterLink>
+          </Box>
           <Box sx={{ display: { xs: 'none', sm: 'flex' } }}>
-            <Button color="inherit" component={RouterLink} to="/signin" sx={{ ml: 3 }}>
+            <Button variant="contained" color="primary" component={RouterLink} to="/signin" sx={{ ml: 3 }}>
               Sign In
             </Button>
-            <Button color="inherit" component={RouterLink} to="/signup" sx={{ ml: 2 }}>
+            <Button variant="contained" color="secondary" component={RouterLink} to="/signup" sx={{ ml: 2 }}>
               Sign Up
             </Button>
           </Box>
