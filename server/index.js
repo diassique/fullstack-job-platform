@@ -1,49 +1,42 @@
-import express from "express";
-import mongoose from "mongoose";
-import morgan from "morgan";
-import bodyParser from "body-parser";
-import cookieParser from "cookie-parser";
-import cors from "cors";
-import { config as dotenvConfig } from "dotenv";
-import errorHandler from "./middleware/error.js"
+const express = require('express');
+const cors = require('cors');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const authMiddleware = require('./middleware/authMiddleware');
+const applicantRouter = require('./routes/applicantRoutes');
+const employerRouter = require('./routes/employerRoutes');
+const applicantController = require('./controllers/applicantController');
+const employerController = require('./controllers/employerController');
 
-// Import routes
-import authRoutes from "./routes/authRoutes.js"
-
-dotenvConfig();
+dotenv.config();
 
 const app = express();
+const PORT = process.env.PORT || 5000;
 
-const port = process.env.PORT || 8000;
-
-// db connection
-mongoose.connect(process.env.DB_URL, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => {
-  console.log("DB ok")
-}).catch((err) => {
-  console.log("Unable to connect to DB:", err);
-})
-
-// middleware
-app.use(morgan('dev'));
-app.use(bodyParser.json({limit: "5mb"}));
-app.use(bodyParser.urlencoded({
-  limit: "5mb",
-  extended: true
-}));
-app.use(cookieParser());
 app.use(cors());
-
-// error middleware
-app.use(errorHandler);
-
-// Routes middleware
-app.use('/', authRoutes);
-
-
-
-app.listen(port, () => {
-  console.log(`Server successfully started on port ${port}`);
+app.use(express.json());
+app.use('/', applicantRouter);
+app.use('/', employerRouter);
+app.get('/me', authMiddleware, (req, res) => {
+  if (req.user.role === 'Applicant') {
+    applicantController.getUserData(req, res);
+  } else {
+    employerController.getUserData(req, res);
+  }
 });
+
+const start = async () => {
+  try {
+    await mongoose.connect(process.env.DB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    app.listen(PORT, () => {
+      console.log(`Server successfully started on port ${PORT}`);
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+
+start();
