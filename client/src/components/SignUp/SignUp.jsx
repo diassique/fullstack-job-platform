@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
+import api from '../../api';
 import { Avatar, Button, CssBaseline, TextField, Link, Grid, Box, Typography, Container, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import { useForm } from 'react-hook-form';
+import { InputAdornment, IconButton } from '@mui/material';
+import Visibility from '@mui/icons-material/Visibility';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
+import { useNavigate } from 'react-router-dom';
+import { Snackbar, Alert } from '@mui/material';
+
 
 export default function SignUp() {
+  const navigate = useNavigate();
+  // To change the user role
   const [role, setRole] = useState("Applicant");
+
+  // To open and hide the password
+  const [showPassword, setShowPassword] = useState(false);
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
 
   const handleRoleChange = (event, newRole) => {
     if (newRole !== null) {
@@ -12,13 +28,40 @@ export default function SignUp() {
     }
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get('email'),
-      password: data.get('password'),
-    });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
+
+  // Snackbar
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+ 
+  const onSubmit = async (data) => {
+    try {
+      const response = await api.post(`/${role.toLowerCase()}/register`, data);
+      if (response.status === 201) {
+        setSnackbarSeverity('success');
+        setSnackbarMessage('Sign up successful');
+        setSnackbarOpen(true);
+        setTimeout(() => {
+          navigate("/signin");
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Sign up error:", error);
+      setSnackbarSeverity('error');
+      setSnackbarMessage('Sign up failed');
+      setSnackbarOpen(true);
+    }
   };
 
   return (
@@ -39,6 +82,17 @@ export default function SignUp() {
           Sign up
         </Typography>
 
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={5000}
+          onClose={handleSnackbarClose}
+          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        >
+          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
+
         <ToggleButtonGroup
           value={role}
           exclusive
@@ -53,7 +107,7 @@ export default function SignUp() {
           </ToggleButton>
         </ToggleButtonGroup>
 
-        <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
+        <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             {role === "Applicant" ? (
               <>
@@ -66,6 +120,9 @@ export default function SignUp() {
                     id="firstName"
                     label="First Name"
                     autoFocus
+                    {...register("firstName", { required: "First name is required" })}
+                    error={errors.firstName}
+                    helperText={errors.firstName && errors.firstName.message}
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
@@ -76,6 +133,9 @@ export default function SignUp() {
                     label="Last Name"
                     name="lastName"
                     autoComplete="family-name"
+                    {...register("lastName", { required: "Last name is required" })}
+                    error={errors.lastName}
+                    helperText={errors.lastName && errors.lastName.message}
                   />
                 </Grid>
               </>
@@ -88,6 +148,9 @@ export default function SignUp() {
                   label="Company Name"
                   name="companyName"
                   autoComplete="organization"
+                  {...register("companyName", { required: "Company name is required" })}
+                  error={errors.companyName}
+                  helperText={errors.companyName && errors.companyName.message}
                 />
               </Grid>
             )}
@@ -99,6 +162,15 @@ export default function SignUp() {
                 label="Email Address"
                 name="email"
                 autoComplete="email"
+                {...register("email", {
+                  required: "Email is required",
+                  pattern: {
+                    value: /^[\w-]+(\.[\w-]+)*@([\w-]+\.)+[a-zA-Z]{2,7}$/,
+                    message: "Wrong email format",
+                  },
+                })}
+                error={errors.email}
+                helperText={errors.email && errors.email.message}
               />
             </Grid>
             <Grid item xs={12}>
@@ -107,9 +179,30 @@ export default function SignUp() {
                 fullWidth
                 name="password"
                 label="Password"
-                type="password"
+                type={showPassword ? 'text' : 'password'}
                 id="password"
                 autoComplete="new-password"
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 8,
+                    message: "Password must be at least 8 characters",
+                  },
+                })}
+                error={errors.password}
+                helperText={errors.password && errors.password.message}
+                InputProps={{
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton
+                        onClick={togglePasswordVisibility}
+                        edge="end"
+                      >
+                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
               />
             </Grid>
           </Grid>
@@ -133,5 +226,5 @@ export default function SignUp() {
         </Box>
       </Box>
     </Container>
-);
+  );
 }
