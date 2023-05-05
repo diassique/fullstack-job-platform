@@ -1,10 +1,11 @@
 import './App.css';
-import Navbar from './components/Navbar/Navbar';
 import { Route, Routes } from 'react-router-dom';
+import Navbar from './components/Navbar/Navbar';
+import HomePage from './components/HomePage/HomePage';
 import SignUp from './components/SignUp/SignUp';
 import SignIn from './components/SignIn/SignIn';
 import Footer from './components/Footer/Footer';
-import HomePage from './components/HomePage/HomePage';
+import NotFound from './components/NotFound/NotFound';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
             <Route exact path="/" element={<HomePage />} />
             <Route exact path="/signin" element={<SignIn />} />
             <Route exact path="/signup" element={<SignUp />} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
         {/* <HomePage /> */}
