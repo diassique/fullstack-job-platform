@@ -1,12 +1,12 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const authMiddleware = require('./middleware/authMiddleware');
 const applicantRouter = require('./routes/applicantRoutes');
 const employerRouter = require('./routes/employerRoutes');
 const applicantController = require('./controllers/applicantController');
 const employerController = require('./controllers/employerController');
+const connectDB = require('./db');
 
 dotenv.config();
 
@@ -25,18 +25,12 @@ app.get('/me', authMiddleware, (req, res) => {
   }
 });
 
-const start = async () => {
-  try {
-    await mongoose.connect(process.env.DB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+connectDB()
+  .then(() => {
     app.listen(PORT, () => {
       console.log(`Server successfully started on port ${PORT}`);
     });
-  } catch (err) {
-    console.log(err);
-  }
-}
-
-start();
+  })
+  .catch((err) => {
+    console.error('Failed to start server:', err);
+  });
