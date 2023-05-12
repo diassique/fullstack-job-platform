@@ -1,7 +1,7 @@
-// src/redux/userSlice.js
 import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
+  userType: '',
   firstName: '',
   lastName: '',
   email: '',
@@ -13,6 +13,7 @@ export const applicantSlice = createSlice({
   initialState,
   reducers: {
     setApplicant: (state, action) => {
+      state.userType = 'Applicant';
       state.firstName = action.payload.firstName;
       state.lastName = action.payload.lastName;
       state.email = action.payload.email;
