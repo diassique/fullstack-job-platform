@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const colors = require('colors');
 
 const connectDB = async () => {
   try {
@@ -6,9 +7,9 @@ const connectDB = async () => {
       useNewUrlParser: true,
       useUnifiedTopology: true
     });
-    console.log('Database connection established');
+    console.log(colors.bgGreen.black('Database connection established'));
   } catch (err) {
-    console.error('Database connection failed:', err);
+    console.error(colors.bgRed.black('Database connection failed:', err));
     process.exit(1);
   }
 };
