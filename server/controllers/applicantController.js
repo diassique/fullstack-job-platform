@@ -47,8 +47,18 @@ exports.login = async (req, res) => {
   }
 
   const token = generateToken(applicant, process.env.JWT_SECRET, '1d');
-  res.json({ token });
+  res.json({ 
+    token,
+    user: {
+      id: applicant._id,
+      email: applicant.email,
+      firstName: applicant.firstName,
+      lastName: applicant.lastName,
+      role: "Applicant"
+    }
+  });
 };
+
 
 // Added this to both applicantController.js and employerController.js
 exports.getUserData = async (req, res) => {
@@ -57,12 +67,21 @@ exports.getUserData = async (req, res) => {
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json({
+    
+    let response = {
       id: user._id,
       email: user.email,
-      name: req.user.role === 'Applicant' ? user.firstName : user.companyName,
       role: user.role,
-    });
+    };
+    
+    if (req.user.role === 'Applicant') {
+      response.firstName = user.firstName;
+      response.lastName = user.lastName;
+    } else {
+      response.name = user.companyName;
+    }
+    
+    res.json(response);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
