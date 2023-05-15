@@ -47,8 +47,17 @@ exports.login = async (req, res) => {
   }
 
   const token = generateToken(employer, process.env.JWT_SECRET, '1d');
-  res.json({ token });
+  res.json({
+    token,
+    user: {
+      id: employer._id,
+      email: employer.email,
+      companyName: employer.companyName,
+      role: "Employer"
+    }
+  });
 };
+
 
 // Added this to both applicantController.js and employerController.js
 exports.getUserData = async (req, res) => {
