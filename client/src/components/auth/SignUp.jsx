@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import api from '../../api';
 import { Avatar, Button, CssBaseline, TextField, Link, Grid, Box, Typography, Container, ToggleButton, ToggleButtonGroup } from '@mui/material';
 import { Link as RouterLink } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
@@ -9,96 +8,53 @@ import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { useNavigate } from 'react-router-dom';
 import { Snackbar, Alert } from '@mui/material';
-
+import api from '../../api/api';
 
 export default function SignUp() {
-  const navigate = useNavigate();
-  // To change the user role
   const [role, setRole] = useState("Applicant");
-
-  // To open and hide the password
   const [showPassword, setShowPassword] = useState(false);
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
 
-  const handleRoleChange = (event, newRole) => {
-    if (newRole !== null) {
-      setRole(newRole);
-    }
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-  // Snackbar
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const handleRoleChange = (event, newRole) => newRole !== null && setRole(newRole);
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
+    if (reason === 'clickaway') { return; }
+    setSnackbar(prevSnackbar => ({ ...prevSnackbar, open: false }));
   };
+  const navigate = useNavigate();
  
   const onSubmit = async (data) => {
     try {
       const response = await api.post(`/${role.toLowerCase()}/register`, data);
       if (response.status === 201) {
-        setSnackbarSeverity('success');
-        setSnackbarMessage('Sign up successful');
-        setSnackbarOpen(true);
+        setSnackbar({ open: true, message: 'Sign up successful', severity: 'success' });
         setTimeout(() => {
           navigate("/signin");
-        }, 3000);
+        }, 2500);
       }
     } catch (error) {
-      console.error("Sign up error:", error);
-      setSnackbarSeverity('error');
-      setSnackbarMessage('Sign up failed');
-      setSnackbarOpen(true);
+      setSnackbar({ open: true, message: 'Sign up failed', severity: 'error' });
     }
   };
 
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <Box
-        sx={{
-          marginTop: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+      <Box sx={{ marginTop: 0, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
           <LockOutlinedIcon />
         </Avatar>
         <Typography component="h1" variant="h5">
           Sign up
         </Typography>
-
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={5000}
-          onClose={handleSnackbarClose}
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
-            {snackbarMessage}
+        <Snackbar open={snackbar.open} autoHideDuration={5000} onClose={handleSnackbarClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }}>
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
           </Alert>
         </Snackbar>
-
-        <ToggleButtonGroup
-          value={role}
-          exclusive
-          onChange={handleRoleChange}
-          sx={{ mt: 2, mb: 2 }}
-        >
+        <ToggleButtonGroup value={role} exclusive onChange={handleRoleChange} sx={{ mt: 2, mb: 2 }}>
           <ToggleButton value="Applicant" sx={{ bgcolor: role === 'Applicant' ? 'primary.main' : '', color: role === 'Applicant' ? 'common.white' : '' }}>
             Applicant
           </ToggleButton>
@@ -106,7 +62,6 @@ export default function SignUp() {
             Employer
           </ToggleButton>
         </ToggleButtonGroup>
-
         <Box component="form" noValidate onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
           <Grid container spacing={2}>
             {role === "Applicant" ? (
@@ -171,6 +126,7 @@ export default function SignUp() {
                 })}
                 error={errors.email}
                 helperText={errors.email && errors.email.message}
+                onChange={e => e.target.value = e.target.value.toLowerCase()}
               />
             </Grid>
             <Grid item xs={12}>
@@ -187,6 +143,10 @@ export default function SignUp() {
                   minLength: {
                     value: 8,
                     message: "Password must be at least 8 characters",
+                  },
+                  pattern: {
+                    value: /^(?=.*[A-Z])(?=.*[0-9])/,
+                    message: "Password must contain at least 1 uppercase letter and 1 number",
                   },
                 })}
                 error={errors.password}
@@ -206,14 +166,7 @@ export default function SignUp() {
               />
             </Grid>
           </Grid>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            sx={{ mt: 3, mb: 2 }}
-            >
-            Sign Up
-          </Button>
+          <Button type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2 }}>Sign Up</Button>
           <Grid container>
             <Grid item>
               <RouterLink to="/signin" style={{ textDecoration: 'none' }}>
