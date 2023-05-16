@@ -1,93 +1,53 @@
 import React, { useState } from 'react';
-import api from '../../api';
+import api from '../../api/api';
 import { Avatar, Button, CssBaseline, TextField, Link, Grid, Box, Typography, Container, ToggleButton, ToggleButtonGroup } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import { useForm } from 'react-hook-form';
 import { InputAdornment, IconButton } from '@mui/material';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import { Snackbar, Alert } from '@mui/material';
+// redux
+import { useDispatch } from 'react-redux';
+import { loginStart, loginSuccess, loginFailure } from '../../redux/slices/authSlice';
 
 export default function SignIn() {
-  // To change the user role
   const [role, setRole] = useState("Applicant");
-
-  // To open and hide the password
   const [showPassword, setShowPassword] = useState(false);
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
+  const togglePasswordVisibility = () => { setShowPassword(!showPassword); };
   const handleRoleChange = (event, newRole) => {
     if (newRole !== null) {
       setRole(newRole);
     }
   };
-
-  const fetchUserData = async () => {
-    try {
-      const response = await api.get('/me'); // Replace with the correct endpoint for fetching user data
-      return response.data;
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      return null;
-    }
-  };
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
-
-
-  // Snackbar states
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState('');
-  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const { register, handleSubmit, formState: { errors } } = useForm();
+  const navigate = useNavigate();
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const handleSnackbarClose = (event, reason) => {
-    if (reason === 'clickaway') {
-      return;
-    }
-    setSnackbarOpen(false);
+    if (reason === 'clickaway') { return; }
+    setSnackbar(prevSnackbar => ({ ...prevSnackbar, open: false }));
   };
+
+  const dispatch = useDispatch();
 
   const onSubmit = async (data) => {
-    const { email, password } = data;
-  
     try {
-      // Send login request to API
-      const response = role === 'Applicant'
-        ? await api.post('/applicant/login', { email, password })
-        : await api.post('/employer/login', { email, password });
-  
-      if (!response || !response.data || !response.data.token) {
-        throw new Error('Login failed');
-      }
-  
-      localStorage.setItem('authToken', response.data.token); // Store the token for future requests
-  
-      const userData = await fetchUserData();
-      console.log('User data:', userData);
-      if (userData) {
-        const name = userData.name;
-        alert(`Hello ${role}! Your ${role === 'Applicant' ? 'name' : 'company name'} is ${name}`);
-      }
-  
-      setSnackbarSeverity('success');
-      setSnackbarMessage('Login successful');
-      setSnackbarOpen(true);
-  
+      dispatch(loginStart()); // start the login process
+      setSnackbar({ open: true, message: 'Login successful', severity: 'success' });
+
+      const response = await api.post(`/${role.toLowerCase()}/login`, data);
+      localStorage.setItem('authToken', response.data.token); // save the token to localStorage
+      localStorage.setItem('user', JSON.stringify(response.data.user));  
+
+      dispatch(loginSuccess(response.data.user)); // dispatch action to Redux
+
+      navigate(`/${role.toLowerCase()}`); // redirect to the corresponding page
     } catch (error) {
-      console.error('Error logging in:', error);
-  
-      setSnackbarSeverity('error');
-      setSnackbarMessage('Email or password is incorrect, or account does not exist');
-      setSnackbarOpen(true);
+      dispatch(loginFailure(error.response.data.error)); // dispatch failure action to Redux
+      setSnackbar({ open: true, message: error.response.data.error, severity: 'error' });
     }
   };
-  
 
   return (
     <Container component="main" maxWidth="xs">
@@ -106,18 +66,16 @@ export default function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-
         <Snackbar
-          open={snackbarOpen}
+          open={snackbar.open}
           autoHideDuration={5000}
           onClose={handleSnackbarClose}
           anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         >
-          <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: '100%' }}>
-            {snackbarMessage}
+          <Alert onClose={handleSnackbarClose} severity={snackbar.severity} sx={{ width: '100%' }}>
+            {snackbar.message}
           </Alert>
         </Snackbar>
-
         <ToggleButtonGroup
           value={role}
           exclusive
@@ -131,8 +89,7 @@ export default function SignIn() {
             Employer
           </ToggleButton>
         </ToggleButtonGroup>
-
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
+        <Box component="form" noValidate sx={{ mt: 1 }} onSubmit={handleSubmit(onSubmit)}>
           <TextField
             margin="normal"
             required
@@ -163,10 +120,6 @@ export default function SignIn() {
             autoComplete="current-password"
             {...register("password", {
               required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
             })}
             error={!!errors.password}
             helperText={errors.password && errors.password.message}
