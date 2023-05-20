@@ -35,7 +35,6 @@ export default function Homepage() {
           </Button>
         </Box>
       </Box>
-
       {/* Features section */}
       <Box p={4}>
         <Typography variant="h4" component="h2" gutterBottom textAlign="center">
@@ -77,16 +76,14 @@ export default function Homepage() {
           </Grid>
         </Grid>
       </Box>
-
-
       {/* Available job positions section */}
       <Box p={4}>
         <Typography variant="h4" component="h2" gutterBottom textAlign="center">
           Available Job Positions
         </Typography>
         <Grid container spacing={4} justifyContent="center">
-                    {/* You can replace the following with dynamic content from your API */}
-                    <Grid item xs={12} sm={6} md={4}>
+            {/* You can replace the following with dynamic content from your API */}
+            <Grid item xs={12} sm={6} md={4}>
             <Paper elevation={3} sx={{ p: 4, minHeight: '200px', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
               <Typography variant="h6" component="h3">
                 Software Engineer
