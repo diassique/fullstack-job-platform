@@ -215,6 +215,7 @@ exports.checkResume = async (req, res) => {
   }
 };
 
+// auth
 exports.register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
@@ -266,30 +267,56 @@ exports.login = async (req, res) => {
   });
 };
 
-
-// Added this to both applicantController.js and employerController.js
-exports.getUserData = async (req, res) => {
+// job positions CRUD
+exports.addPosition = async (req, res) => {
   try {
-    const user = await (req.user.role === 'Applicant' ? Applicant : Employer).findById(req.user.id);
-    if (!user) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    
-    let response = {
-      id: user._id,
-      email: user.email,
-      role: user.role,
-    };
-    
-    if (req.user.role === 'Applicant') {
-      response.firstName = user.firstName;
-      response.lastName = user.lastName;
-    } else {
-      response.name = user.companyName;
-    }
-    
-    res.json(response);
+    const positionData = req.body;
+    let user = await Applicant.findById(req.user.id);
+    const newPosition = user.positions.create(positionData); // Create a new subdocument
+    user.positions.push(newPosition); // Add it to the array
+    await user.save();
+    res.json(newPosition); // Respond with the new position, including its _id
   } catch (error) {
+    console.error('Error in addPosition:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getPositions = async (req, res) => {
+  try {
+    let user = await Applicant.findById(req.user.id);
+    res.json(user.positions);
+  } catch (error) {
+    console.error('Error in getPositions:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updatePosition = async (req, res) => {
+  try {
+    const positionId = req.params.positionId;
+    const positionData = req.body;
+    let user = await Applicant.findById(req.user.id);
+    let position = user.positions.id(positionId);
+    if (!position) return res.status(404).json({ error: 'Position not found' });
+    Object.assign(position, positionData);
+    await user.save();
+    res.json(position);
+  } catch (error) {
+    console.error('Error in updatePosition:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deletePosition = async (req, res) => {
+  try {
+    const positionId = req.params.positionId;
+    let user = await Applicant.findById(req.user.id);
+    user.positions.pull({_id: positionId}); // Here is where we are using the pull function
+    await user.save();
+    res.json({ message: 'Position deleted' });
+  } catch (error) {
+    console.error('Error in deletePosition:', error);
     res.status(500).json({ error: error.message });
   }
 };
