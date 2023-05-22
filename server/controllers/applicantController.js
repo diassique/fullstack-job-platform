@@ -138,6 +138,83 @@ exports.deleteAvatar = async (req, res) => {
   }
 };
 
+// resume upload
+const resumeStorage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    const dir = path.join(__dirname, `../uploads/resumes/${req.user.id}`);
+    await fs.promises.mkdir(dir, { recursive: true });
+    console.log('Created directory:', dir);
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    cb(null, 'CV' + path.extname(file.originalname));
+  },
+});
+exports.resumeUpload = multer({ 
+  storage: resumeStorage,
+  fileFilter: function(req, file, cb) {
+    if (!file.originalname.match(/\.(pdf|doc|docx)$/)) {
+      console.log('Invalid file type:', file.originalname);
+      return cb(new Error('Please upload a file in pdf or word format.'));
+    }
+    console.log('Valid file type:', file.originalname);
+    cb(null, true);
+  },
+});
+exports.uploadResume = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    const newResumePath = req.file.filename; // use filename instead of path
+
+    if(user.resume) { // Check if a resume already exists
+      const oldResumePath = path.join(__dirname, `../uploads/resumes/${req.user.id}/${user.resume}`);
+      await fs.promises.unlink(oldResumePath); // Delete the old resume
+    }
+
+    user.resume = newResumePath;
+    await user.save();
+    res.json({ resume: user.resume });
+  } catch (error) {
+    console.log('Error in uploadResume:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+exports.deleteResume = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    if (user.resume) {
+      const resumePath = path.join(__dirname, `../uploads/resumes/${req.user.id}/${user.resume}`);
+      fs.unlink(resumePath, (err) => {
+        if (err) return res.status(500).json({ error: err.message });
+        user.resume = undefined;
+        user.save()
+        .then(() => {
+          res.json({ message: 'Resume deleted' });
+        })
+        .catch((error) => {
+          res.status(500).json({ error: error.message });
+        });
+      });
+    } else {
+      res.json({ message: 'No resume to delete' });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+exports.checkResume = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    if (user.resume) {
+      res.json({ resumeExists: true });
+    } else {
+      res.json({ resumeExists: false });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
 exports.register = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
