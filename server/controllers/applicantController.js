@@ -329,7 +329,6 @@ exports.addEducation = async (req, res) => {
     if (!user) throw new Error('User not found');
     user.education.push({ university, degree, startYear, endYear, description });
     await user.save();
-
     res.json(user.education);
   } catch (error) {
     console.error('Error in addEducation:', error);
@@ -381,6 +380,76 @@ exports.deleteEducation = async (req, res) => {
     res.json(user.education);
   } catch (error) {
     console.error('Error in deleteEducation:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// certifications CRUD
+exports.addCertification = async (req, res) => {
+  try {
+    const { name, authority, licenseNumber, description } = req.body;
+    let user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    user.certifications.push({ name, authority, licenseNumber, description });
+    await user.save();
+    res.json(user.certifications);
+  } catch (error) {
+    console.error('Error in addCertification:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Get all certification entries
+exports.getCertification = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    if (!user) {
+      console.error('Applicant not found:', req.user.id);
+      return res.status(404).json({ error: 'Applicant not found' });
+    }
+    res.json(user.certifications);
+  } catch (error) {
+    console.error('Error in getCertification:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Update certification entry
+exports.updateCertification = async (req, res) => {
+  try {
+    const { certificationId, name, authority, licenseNumber, description } = req.body;
+    let user = await Applicant.findById(req.user.id);
+
+    if (!user) throw new Error('User not found');
+
+    let certificationEntry = user.certifications.id(certificationId);
+    if (!certificationEntry) throw new Error('Certification entry not found');
+
+    certificationEntry.name = name;
+    certificationEntry.authority = authority;
+    certificationEntry.licenseNumber = licenseNumber;
+    certificationEntry.description = description;
+
+    await user.save();
+
+    res.json(user.certifications);
+  } catch (error) {
+    console.error('Error in updateCertification:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// Delete certification entry
+exports.deleteCertification = async (req, res) => {
+  try {
+    const { certificationId } = req.params;
+    let user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    user.certifications = user.certifications.filter(certification => certification._id.toString() !== certificationId);
+    await user.save();
+    res.json(user.certifications);
+  } catch (error) {
+    console.error('Error in deleteCertification:', error);
     res.status(500).json({ error: error.message });
   }
 };
