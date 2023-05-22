@@ -320,3 +320,67 @@ exports.deletePosition = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+// education CRUD
+exports.addEducation = async (req, res) => {
+  try {
+    const { university, degree, startYear, endYear, description } = req.body;
+    let user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    user.education.push({ university, degree, startYear, endYear, description });
+    await user.save();
+
+    res.json(user.education);
+  } catch (error) {
+    console.error('Error in addEducation:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.getEducation = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    res.json(user.education);
+  } catch (error) {
+    console.error('Error in getEducation:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.updateEducation = async (req, res) => {
+  try {
+    const { educationId, university, degree, startYear, endYear, description } = req.body;
+    let user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    let educationEntry = user.education.id(educationId);
+    if (!educationEntry) throw new Error('Education entry not found');
+
+    educationEntry.university = university;
+    educationEntry.degree = degree;
+    educationEntry.startYear = startYear;
+    educationEntry.endYear = endYear;
+    educationEntry.description = description;
+
+    await user.save();
+
+    res.json(user.education);
+  } catch (error) {
+    console.error('Error in updateEducation:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+exports.deleteEducation = async (req, res) => {
+  try {
+    const { educationId } = req.params;
+    let user = await Applicant.findById(req.user.id);
+    if (!user) throw new Error('User not found');
+    user.education = user.education.filter(education => education._id.toString() !== educationId);
+    await user.save();
+    res.json(user.education);
+  } catch (error) {
+    console.error('Error in deleteEducation:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
