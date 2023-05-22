@@ -5,8 +5,66 @@ const { validationResult } = require('express-validator');
 const dotenv = require('dotenv');
 const { generateToken } = require('../utils/jwtHelpers');
 const { checkEmailInBothCollections } = require('../utils/helpers');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
 dotenv.config();
+
+// getting the user details
+exports.getUserDetails = async (req, res) => {
+  try {
+    const user = await Applicant.findById(req.user.id);
+    const resumePath = path.join(__dirname, `../uploads/resumes/${req.user.id}/${user.resume}`);
+    return {
+      id: user.id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      email: user.email,
+      avatar: user.avatar,  // this is the filename
+      resume: user.resume,
+      resumePath: resumePath,
+      location: user.location,
+      phone: user.phone,
+      professionalTitle: user.professionalTitle,
+      shortBio: user.shortBio,
+    };
+  } catch (error) {
+    console.log('Error in getUserDetails:', error);
+    throw error;
+  }
+};
+// updating user details
+exports.updateUserDetails = async (req, res) => {
+  try {
+    const { firstName, lastName, location, phone, professionalTitle, shortBio } = req.body;
+    let user = await Applicant.findById(req.user.id);
+
+    if (!user) throw new Error('User not found');
+
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.location = location;
+    user.phone = phone;
+    user.professionalTitle = professionalTitle;
+    user.shortBio = shortBio;
+
+    await user.save();
+
+    res.json({
+      id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      location: user.location,
+      phone: user.phone,
+      professionalTitle: user.professionalTitle,
+      shortBio: user.shortBio
+    });
+  } catch (error) {
+    console.error('Error in updateUserDetails:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
 
 exports.register = async (req, res) => {
   const errors = validationResult(req);
