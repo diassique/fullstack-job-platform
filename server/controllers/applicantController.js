@@ -11,7 +11,7 @@ const path = require('path');
 
 dotenv.config();
 
-// getting the user details
+// get user details
 exports.getUserDetails = async (req, res) => {
   try {
     const user = await Applicant.findById(req.user.id);
@@ -21,20 +21,24 @@ exports.getUserDetails = async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       email: user.email,
-      avatar: user.avatar,  // this is the filename
+      avatar: user.avatar,
       resume: user.resume,
       resumePath: resumePath,
       location: user.location,
       phone: user.phone,
       professionalTitle: user.professionalTitle,
       shortBio: user.shortBio,
+      positions: user.positions,
+      education: user.education,
+      certifications: user.certifications,
     };
   } catch (error) {
     console.log('Error in getUserDetails:', error);
     throw error;
   }
 };
-// updating user details
+
+// update user details
 exports.updateUserDetails = async (req, res) => {
   try {
     const { firstName, lastName, location, phone, professionalTitle, shortBio } = req.body;
@@ -94,7 +98,7 @@ exports.upload = multer({
 exports.uploadAvatar = async (req, res) => {
   try {
     const user = await Applicant.findById(req.user.id);
-    const newAvatarPath = req.file.filename; // use filename instead of path
+    const newAvatarPath = req.file.filename;
     const userDir = path.join(__dirname, `../uploads/applicants/${req.user.id}`);
     const files = await fs.promises.readdir(userDir);
 
@@ -138,7 +142,7 @@ exports.deleteAvatar = async (req, res) => {
   }
 };
 
-// resume upload
+// Resume upload
 const resumeStorage = multer.diskStorage({
   destination: async (req, file, cb) => {
     const dir = path.join(__dirname, `../uploads/resumes/${req.user.id}`);
@@ -164,11 +168,11 @@ exports.resumeUpload = multer({
 exports.uploadResume = async (req, res) => {
   try {
     const user = await Applicant.findById(req.user.id);
-    const newResumePath = req.file.filename; // use filename instead of path
+    const newResumePath = req.file.filename;
 
     if(user.resume) { // Check if a resume already exists
       const oldResumePath = path.join(__dirname, `../uploads/resumes/${req.user.id}/${user.resume}`);
-      await fs.promises.unlink(oldResumePath); // Delete the old resume
+      await fs.promises.unlink(oldResumePath);
     }
 
     user.resume = newResumePath;
@@ -267,21 +271,22 @@ exports.login = async (req, res) => {
   });
 };
 
-// job positions CRUD
+// Add a position
 exports.addPosition = async (req, res) => {
   try {
     const positionData = req.body;
     let user = await Applicant.findById(req.user.id);
-    const newPosition = user.positions.create(positionData); // Create a new subdocument
-    user.positions.push(newPosition); // Add it to the array
+    const newPosition = user.positions.create(positionData);
+    user.positions.push(newPosition);
     await user.save();
-    res.json(newPosition); // Respond with the new position, including its _id
+    res.json(newPosition);
   } catch (error) {
     console.error('Error in addPosition:', error);
     res.status(500).json({ error: error.message });
   }
 };
 
+// Get positions
 exports.getPositions = async (req, res) => {
   try {
     let user = await Applicant.findById(req.user.id);
@@ -292,6 +297,7 @@ exports.getPositions = async (req, res) => {
   }
 };
 
+// Update a position
 exports.updatePosition = async (req, res) => {
   try {
     const positionId = req.params.positionId;
@@ -308,11 +314,12 @@ exports.updatePosition = async (req, res) => {
   }
 };
 
+// Delete a position
 exports.deletePosition = async (req, res) => {
   try {
     const positionId = req.params.positionId;
     let user = await Applicant.findById(req.user.id);
-    user.positions.pull({_id: positionId}); // Here is where we are using the pull function
+    user.positions.pull({_id: positionId});
     await user.save();
     res.json({ message: 'Position deleted' });
   } catch (error) {
@@ -321,14 +328,17 @@ exports.deletePosition = async (req, res) => {
   }
 };
 
-// education CRUD
+// Add education entry
 exports.addEducation = async (req, res) => {
   try {
     const { university, degree, startYear, endYear, description } = req.body;
     let user = await Applicant.findById(req.user.id);
+
     if (!user) throw new Error('User not found');
+
     user.education.push({ university, degree, startYear, endYear, description });
     await user.save();
+
     res.json(user.education);
   } catch (error) {
     console.error('Error in addEducation:', error);
@@ -336,6 +346,7 @@ exports.addEducation = async (req, res) => {
   }
 };
 
+// Get all education entries
 exports.getEducation = async (req, res) => {
   try {
     const user = await Applicant.findById(req.user.id);
@@ -347,11 +358,14 @@ exports.getEducation = async (req, res) => {
   }
 };
 
+// Update education entry
 exports.updateEducation = async (req, res) => {
   try {
     const { educationId, university, degree, startYear, endYear, description } = req.body;
     let user = await Applicant.findById(req.user.id);
+
     if (!user) throw new Error('User not found');
+
     let educationEntry = user.education.id(educationId);
     if (!educationEntry) throw new Error('Education entry not found');
 
@@ -374,9 +388,13 @@ exports.deleteEducation = async (req, res) => {
   try {
     const { educationId } = req.params;
     let user = await Applicant.findById(req.user.id);
+
     if (!user) throw new Error('User not found');
+
     user.education = user.education.filter(education => education._id.toString() !== educationId);
+
     await user.save();
+
     res.json(user.education);
   } catch (error) {
     console.error('Error in deleteEducation:', error);
@@ -384,14 +402,17 @@ exports.deleteEducation = async (req, res) => {
   }
 };
 
-// certifications CRUD
+// Add certification entry
 exports.addCertification = async (req, res) => {
   try {
     const { name, authority, licenseNumber, description } = req.body;
     let user = await Applicant.findById(req.user.id);
+
     if (!user) throw new Error('User not found');
+
     user.certifications.push({ name, authority, licenseNumber, description });
     await user.save();
+
     res.json(user.certifications);
   } catch (error) {
     console.error('Error in addCertification:', error);
@@ -403,10 +424,12 @@ exports.addCertification = async (req, res) => {
 exports.getCertification = async (req, res) => {
   try {
     const user = await Applicant.findById(req.user.id);
+
     if (!user) {
       console.error('Applicant not found:', req.user.id);
       return res.status(404).json({ error: 'Applicant not found' });
     }
+
     res.json(user.certifications);
   } catch (error) {
     console.error('Error in getCertification:', error);
@@ -444,9 +467,13 @@ exports.deleteCertification = async (req, res) => {
   try {
     const { certificationId } = req.params;
     let user = await Applicant.findById(req.user.id);
+
     if (!user) throw new Error('User not found');
+
     user.certifications = user.certifications.filter(certification => certification._id.toString() !== certificationId);
+
     await user.save();
+
     res.json(user.certifications);
   } catch (error) {
     console.error('Error in deleteCertification:', error);
