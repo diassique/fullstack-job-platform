@@ -6,6 +6,7 @@ const JobSchema = new Schema({
     required: true,
     ref: 'Employer'
   },
+  companyName: { type: String, required: true },
   title: { type: String, required: true },
   type: { type: String, required: true },
   location: { type: String, required: true },

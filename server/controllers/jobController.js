@@ -1,4 +1,5 @@
 const Job = require('../models/Job');
+const Application = require('../models/Application');
 
 exports.getEmployerJobs = async (req, res) => {
   try {
@@ -8,7 +9,6 @@ exports.getEmployerJobs = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
 
 exports.getAllJobs = async (req, res) => {
   try {
@@ -51,8 +51,32 @@ exports.deleteJob = async (req, res) => {
     if (!deletedJob) {
       return res.status(404).json({ error: 'Job not found' });
     }
+
+    await Application.updateMany({ jobId: req.params.id }, { status: 'job-deleted' });
+    
     res.json(deletedJob);
   } catch (error) {
     res.status(400).json({ error: error.message });
+  }
+};
+
+exports.getEmployerStats = async (req, res) => {
+  try {
+    const employerId = req.params.id;
+    const jobsPostedCount = await Job.countDocuments({ userId: employerId });
+    const applicationsCount = await Application.countDocuments({ recruiterId: employerId });
+    const acceptedApplicationsCount = await Application.countDocuments({ recruiterId: employerId, status: 'accepted' });
+    const shortlistedApplicationsCount = await Application.countDocuments({ recruiterId: employerId, status: 'shortlisted' });
+    const rejectedApplicationsCount = await Application.countDocuments({ recruiterId: employerId, status: 'rejected' });
+
+    res.json({
+      jobsPosted: jobsPostedCount,
+      applications: applicationsCount,
+      acceptedApplications: acceptedApplicationsCount,
+      shortlistedApplications: shortlistedApplicationsCount,
+      rejectedApplications: rejectedApplicationsCount
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 };
