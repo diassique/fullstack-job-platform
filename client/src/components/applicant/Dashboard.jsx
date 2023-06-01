@@ -10,13 +10,14 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import MenuIcon from '@mui/icons-material/Menu';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { mainListItems, secondaryListItems } from './listItems';
+import { mainListItems, LogoutListItemButton } from './listItems';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import ProfilePage from './Profile';
 import SettingsPage from './Settings';
 import FindJobsPage from './FindJobs';
 import CompaniesPage from './Companies';
 import ApplicationsPage from './Applications';
+import CompanyPage from './CompanyPage';
 import api from '../../api/api';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -160,11 +161,17 @@ function DashboardContent(props) {
             <IconButton onClick={toggleDrawer}><ChevronLeftIcon /></IconButton>
           </Toolbar>
           <Divider />
-          <List component="nav">
-            {mainListItems}
-            <Divider sx={{ my: 1 }} />
-            {secondaryListItems}
-          </List>
+          <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <Box sx={{ flexGrow: 1 }}>
+              <List component="nav">
+                {mainListItems}
+                <Divider sx={{ my: 1 }} />
+              </List>
+            </Box>
+            <List>
+              <LogoutListItemButton />
+            </List>
+          </Box>
         </Drawer>
         <Box
           component="main"
@@ -184,6 +191,7 @@ function DashboardContent(props) {
             <Route path="applications" element={<ApplicationsPage />} />
             <Route path="profile" element={<ProfilePage />} />
             <Route path="companies" element={<CompaniesPage />} />
+            <Route path="companies/:companyId" element={<CompanyPage />} />
             <Route path="settings" element={<SettingsPage />} />
           </Routes>
         </Box>

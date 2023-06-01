@@ -1,11 +1,11 @@
-import React from 'react';
 import { Card, CardContent, Typography, IconButton, Chip, Divider, Button } from '@mui/material';
 import BusinessIcon from '@mui/icons-material/Business';
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import PeopleIcon from '@mui/icons-material/People';
+import React from 'react';
 
-const JobCard = ({ job, onApply  }) => {
+const JobCard = ({ job, onApply, disabled }) => {
   return (
     <Card style={{ borderRadius: '15px', padding: '5px' }}>
       <CardContent>
@@ -39,7 +39,7 @@ const JobCard = ({ job, onApply  }) => {
           <div style={{ display: 'flex', alignItems: 'center', marginLeft: '15px' }}>
             <IconButton><PeopleIcon color="primary" /></IconButton>
             <Typography variant="body2" style={{ marginLeft: '5px' }}>{`${job.activeApplications} people applied`}</Typography>
-            <Button variant="contained" color="primary" style={{ marginLeft: '50px' }} onClick={() => onApply(job)}>Apply</Button>
+            <Button variant="contained" color="primary" style={{ marginLeft: '50px' }} onClick={() => onApply(job)} disabled={disabled}>Apply</Button>
           </div>
         </div>
       </CardContent>

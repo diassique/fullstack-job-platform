@@ -2,16 +2,32 @@ import * as React from 'react';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
-import ListSubheader from '@mui/material/ListSubheader';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-// import BookmarkIcon from '@mui/icons-material/Bookmark';
 import WorkHistoryRoundedIcon from '@mui/icons-material/WorkHistoryRounded';
 import PersonIcon from '@mui/icons-material/Person';
 import ApartmentIcon from '@mui/icons-material/Apartment';
-import ContactPageIcon from '@mui/icons-material/ContactPage';
-import AssignmentIcon from '@mui/icons-material/Assignment';
 import SettingsIcon from '@mui/icons-material/Settings';
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 import { useNavigate } from 'react-router-dom';
+import { logout } from '../../redux/slices/authSlice';
+import { useDispatch } from 'react-redux';
+
+const LogoutListItemButton = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const handleClick = () => {
+    dispatch(logout());
+    navigate('/');
+  };
+  return (
+    <ListItemButton onClick={handleClick}>
+      <ListItemIcon>
+        <ExitToAppIcon />
+      </ListItemIcon>
+      <ListItemText primary="Log Out" />
+    </ListItemButton>
+  );
+};
 
 const SettingsListItemButton = () => {
   const navigate = useNavigate();
@@ -88,22 +104,4 @@ export const mainListItems = (
   </React.Fragment>
 );
 
-export const secondaryListItems = (
-  <React.Fragment>
-    <ListSubheader component="div" inset>
-      Additional Features
-    </ListSubheader>
-    <ListItemButton>
-      <ListItemIcon>
-        <ContactPageIcon />
-      </ListItemIcon>
-      <ListItemText primary="CV Creator" />
-    </ListItemButton>
-    <ListItemButton>
-      <ListItemIcon>
-        <AssignmentIcon />
-      </ListItemIcon>
-      <ListItemText primary="Career Resources" />
-    </ListItemButton>
-  </React.Fragment>
-);
+export { LogoutListItemButton };
