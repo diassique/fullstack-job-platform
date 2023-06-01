@@ -10,6 +10,8 @@ import contentImageSecond from '../../assets/pic-2.svg';
 import contentImageThird from '../../assets/pic-3.svg';
 import styled from 'styled-components';
 
+import video from '../../assets/video.mp4'
+
 const ContentImage = styled('img')`
   width: 60%;
   margin-bottom: 1rem;
@@ -19,22 +21,37 @@ export default function Homepage() {
   return (
     <Box sx={{ flexGrow: 1 }}>
       {/* Hero section */}
-      <Box sx={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
-        <Typography variant="h2" component="h1" gutterBottom sx={{ textAlign: 'center', px: { xs: 2, sm: 0 } }}>
+      <Box sx={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', position: 'relative' }}>
+        <video autoPlay loop muted 
+          style={{
+            position: "absolute",
+            width: "100%",
+            left: "50%",
+            top: "50%",
+            height: "100%",
+            objectFit: "cover",
+            transform: "translate(-50%, -50%)",
+            zIndex: "-1"
+          }}
+        >
+          <source src={video} type="video/mp4" />
+        </video>
+        <Typography variant="h2" component="h1" gutterBottom sx={{ textAlign: 'center', px: { xs: 2, sm: 0 }, zIndex: '1', color: '#ffffff' }}>
           Online Recruitment System
         </Typography>
-        <Typography variant="h5" component="p" gutterBottom sx={{ textAlign: 'center', px: { xs: 2, sm: 0 } }}>
+        <Typography variant="h5" component="p" gutterBottom sx={{ textAlign: 'center', px: { xs: 2, sm: 0 }, zIndex: '1', color: '#ffffff' }}>
           Find your dream job or hire the best talent
         </Typography>
         <Box mt={4}>
           <Button variant="contained" color="primary" component={RouterLink} to="/signin" sx={{ mr: 1 }}>
             Sign In
           </Button>
-          <Button variant="outlined" color="primary" component={RouterLink} to="/signup" sx={{ ml: 1 }}>
+          <Button variant="contained" color="secondary" component={RouterLink} to="/signup" sx={{ ml: 1 }}>
             Sign Up
           </Button>
         </Box>
       </Box>
+
       {/* Features section */}
       <Box p={4}>
         <Typography variant="h4" component="h2" gutterBottom textAlign="center">
@@ -76,6 +93,8 @@ export default function Homepage() {
           </Grid>
         </Grid>
       </Box>
+
+
       {/* Available job positions section */}
       <Box p={4}>
         <Typography variant="h4" component="h2" gutterBottom textAlign="center">

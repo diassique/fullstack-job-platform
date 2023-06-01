@@ -10,6 +10,7 @@ import Footer from './components/common/Footer';
 import ApplicantDashboard from './components/applicant/Dashboard';
 import EmployerDashboard from './components/employer/Dashboard';
 import PrivateRoute from './components/auth/Private';
+import ChatWidget from './components/common/Chat';
 
 import { useDispatch } from 'react-redux';
 import { rehydrate } from './redux/slices/authSlice';
@@ -45,6 +46,7 @@ function App() {
           }/>
         </Routes>
       </div>
+      <ChatWidget />
       <Footer />
     </div>
   );
