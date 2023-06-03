@@ -17,6 +17,9 @@ import SettingsPage from './Settings';
 import CreateJobPage from './CreateJob';
 import ApplicationsPage from './Applications';
 import ManageJobsPage from './ManageJobs';
+import ApplicantsPage from './Applicants';
+import ApplicantPage from './ApplicantPage';
+import Welcome from './Welcome';
 import api from '../../api/api';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -80,6 +83,8 @@ function DashboardContent() {
   const dispatch = useDispatch();  
   const navigate = useNavigate();
   const handleLogout = () => { dispatch(logout()); handleCloseUserMenu(); };
+
+
 
   const [profileImg, setProfileImg] = useState(null);
   useEffect(() => {
@@ -189,11 +194,14 @@ function DashboardContent() {
         >
           <Toolbar />
           <Routes>
+            <Route path="/" element={<Welcome />} />
             <Route path="createjob" element={<CreateJobPage />} />
             <Route path="managejobs" element={<ManageJobsPage />} />
             <Route path="profile" element={<ProfilePage />} />
-            <Route path="settings" element={<SettingsPage />} />
             <Route path="applications" element={<ApplicationsPage />} />
+            <Route path="applicants" element={<ApplicantsPage />} />
+            <Route path="applicants/:applicantId" element={<ApplicantPage />} />
+            <Route path="settings" element={<SettingsPage />} />
             <Route path="blog" element={<BlogPage />} />
           </Routes>
         </Box>

@@ -18,6 +18,7 @@ import FindJobsPage from './FindJobs';
 import CompaniesPage from './Companies';
 import ApplicationsPage from './Applications';
 import CompanyPage from './CompanyPage';
+import Welcome from './Welcome';
 import api from '../../api/api';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -187,6 +188,7 @@ function DashboardContent(props) {
         >
           <Toolbar />
           <Routes>
+            <Route path="/" element={<Welcome />} />
             <Route path="jobs" element={<FindJobsPage />} />
             <Route path="applications" element={<ApplicationsPage />} />
             <Route path="profile" element={<ProfilePage />} />
