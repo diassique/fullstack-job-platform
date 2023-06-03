@@ -38,6 +38,28 @@ exports.getUserDetails = async (req, res) => {
   }
 };
 
+exports.getAllApplicants = async (req, res) => {
+  try {
+    const applicants = await Applicant.find({});
+    res.json(applicants);
+  } catch (error) {
+    console.log('Error in getAllApplicants', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+exports.getApplicantById = async (req, res) => {
+  try {
+    const applicant = await Applicant.findById(req.params.id);
+    if (!applicant) {
+      return res.status(404).json({ error: 'Applicant not found' });
+    }
+    res.json(applicant);
+  } catch (error) {
+    console.error('Error in getApplicantById:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 // update user details
 exports.updateUserDetails = async (req, res) => {
   try {

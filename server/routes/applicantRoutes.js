@@ -23,6 +23,9 @@ router.put('/applicant/details', authMiddleware, applicantsController.updateUser
 router.post('/applicant/register', applicantValidationRules, applicantsController.register);
 router.post('/applicant/login', applicantsController.login);
 
+router.get('/applicants', applicantsController.getAllApplicants);
+router.get('/applicants/:id', applicantsController.getApplicantById);
+
 // CRUD job positions
 router.post('/applicant/positions', authMiddleware, applicantsController.addPosition);
 router.get('/applicant/positions', authMiddleware, applicantsController.getPositions);
